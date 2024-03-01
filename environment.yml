@@ -1,0 +1,7 @@
+name: ColorByNumber
+channels:
+  - defaults
+  - menpo
+dependencies:
+  - python=3.9
+  - opencv
