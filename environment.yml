@@ -7,3 +7,4 @@ dependencies:
   - python=3.9
   - opencv
   - jupyterlab
+  - matplotlib
