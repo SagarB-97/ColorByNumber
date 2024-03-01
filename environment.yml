@@ -1,7 +1,9 @@
 name: ColorByNumber
 channels:
   - defaults
+  - conda-forge
   - menpo
 dependencies:
   - python=3.9
   - opencv
+  - jupyterlab
