@@ -1,18 +1,5 @@
 import numpy as np
 
-def _closest_color(pixel, color_list):
-    """
-    Finds the closest color in the list to the given pixel (RGB values)
-    
-    Args:
-      pixel: A tuple representing the RGB values of a pixel (R, G, B).
-      color_list: A list of tuples representing RGB values of allowed colors.
-    
-    Returns:
-      A tuple representing the RGB values of the closest color in the list.
-    """
-    distances = np.array([np.linalg.norm(np.array(pixel) - np.array(color)) for color in color_list])
-    return color_list[np.argmin(distances)]
 
 def simplify_image(image, color_list):
     """
@@ -26,12 +13,15 @@ def simplify_image(image, color_list):
       A copy of the image with all colors replaced with the closest color in the list.
     """
     
-    # Replace each pixel with closest color from the list
-    converted_image = image.copy()  # Operate on a copy
-    height, width, channels = image.shape
-    for y in range(height):
-        for x in range(width):
-            pixel = image[y, x]
-            closest = _closest_color(pixel, color_list)
-            converted_image[y, x] = closest
-    return converted_image
+    width, height, channels = image.shape
+    image_copy = image.reshape((width, height, 1, channels)).copy()
+
+    color_list = np.array(color_list)
+    num_colors = color_list.shape[0]
+    color_list_broadcastable = color_list.reshape((1, 1, num_colors, 3))
+
+    norm_diff = ((image_copy - color_list_broadcastable)**2).sum(axis = -1)
+    indices_color_choices = norm_diff.argmin(axis = -1)
+    simplified_image = color_list[indices_color_choices.flatten(), :].reshape(image.shape)
+
+    return simplified_image
