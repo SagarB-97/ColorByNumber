@@ -1,7 +1,8 @@
+import cv2 as cv
 import numpy as np
 
 
-def simplify_image(image, color_list):
+def _choose_closest_colors(image, color_list):
     """
     Converts all colors in an image to the closest color in the color list.
     
@@ -24,4 +25,43 @@ def simplify_image(image, color_list):
     indices_color_choices = norm_diff.argmin(axis = -1)
     simplified_image = color_list[indices_color_choices.flatten(), :].reshape(image.shape)
 
-    return simplified_image
+    return simplified_image, indices_color_choices
+
+def _denoise_image(image, h):
+    denoised_image = cv.fastNlMeansDenoisingColored(
+        src = image.astype(np.uint8),
+        dst = None,
+        h = h,
+        hColor = h,
+        templateWindowSize = 7,
+        searchWindowSize = 21
+    )
+    return denoised_image
+
+def simplify_image(image, 
+                   color_list, 
+                   denoise = True,
+                   denoise_h = 100
+                   ):
+    """
+    Converts all colors in an image to the closest color in the color list.
+    Denoises if required.
+    
+    Args:
+      image: Image in the RGB color space as a 3D array.
+      color_list: A list of tuples representing RGB values of allowed colors.
+    
+    Returns:
+      A copy of the image with all colors replaced with the closest color in the list.
+    """
+    
+    simplified_image, indices_color_choices = _choose_closest_colors(image, color_list)
+    if denoise:
+        # Denoising after simplifying image as denoising original image need not reduce the 
+        # number of colors islands and also removed some key features from the original image.
+        simplified_image = _denoise_image(simplified_image, denoise_h)
+    
+        # Simplying image again as denoising may have introduced new colors.
+        simplified_image, indices_color_choices = _choose_closest_colors(simplified_image, color_list)
+
+    return simplified_image, indices_color_choices
