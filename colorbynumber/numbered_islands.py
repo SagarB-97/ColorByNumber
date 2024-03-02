@@ -2,20 +2,8 @@ import cv2
 import numpy as np
 
 def _get_centroid(coordinates):
-    """Get the centroid of a set of coordinates.
-    
-    Args:
-        coordinates (list): A list of tuples.
-            Each tuple contains the row and column of a pixel.
-    Returns:
-        tuple: The row and column of the centroid.
-    """
-    row_sum = 0
-    col_sum = 0
-    for row, col in coordinates:
-        row_sum += row
-        col_sum += col
-    return (row_sum // len(coordinates), col_sum // len(coordinates))
+    rows, cols = coordinates
+    return (int(np.mean(rows)), int(np.mean(cols)))
 
 
 def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0)):
@@ -32,7 +20,7 @@ def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0))
     """
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = font_size
-    font_thickness = 2
+    font_thickness = 4
     position = (position[1], position[0])
     return cv2.putText(
         image, 
@@ -52,26 +40,21 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0]):
     Args:
         image (np.array): Numpy image.
         islands (list): A list of tuples. 
-            Each tuple contains the color and the coordinates of the pixels in an island.
+            Each tuple contains the color_id and the coordinates of the pixels in an island.
     Returns:
         np.array: A new image with the islands numbered.
     """
     # Create an all white image
     numbered_islands = np.ones(image_shape, dtype=np.uint8) * 255
 
-    color_to_number = {}
-    for i, (color, _) in enumerate(islands):
-        color_to_number[color] = i + 1
-
-    for color, island_coordinates in islands:
-        for row, col in island_coordinates:
-            numbered_islands[row, col] = border_color
+    for color_id, island_coordinates in islands:
+        numbered_islands[island_coordinates] = border_color
         centroid = _get_centroid(island_coordinates)
         
         # Add the number to the centroid of the island
         numbered_islands = _add_text_to_image(
             numbered_islands, 
-            str(color_to_number[color]), 
+            str(color_id), 
             centroid
         )
     
