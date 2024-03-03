@@ -10,9 +10,11 @@ class GenerateIslands:
         self.gradient_kernel = np.ones((gradient_kernel_size, gradient_kernel_size), np.uint8)
         self.color_index_island_list = []
     
-    def _get_islands_for_one_color(self, color_index):
+    def _get_islands_for_one_color(self, color_index, border_padding):
         # Get a binary image with just the selected color
         this_color = (self.indices_color_choices == color_index).astype(np.uint8)
+        # Pad the image to enable border detection on image boundaries
+        this_color = np.pad(this_color, border_padding, mode='constant', constant_values=0)
 
         # Find connected components
         num_labels, labels_im = cv.connectedComponents(this_color)
@@ -29,9 +31,9 @@ class GenerateIslands:
         
         return this_color_index_island_list
     
-    def get_islands(self):
+    def get_islands(self, border_padding=2):
         for color_index in np.unique(self.indices_color_choices):
-            this_color_index_island_list = self._get_islands_for_one_color(color_index)
+            this_color_index_island_list = self._get_islands_for_one_color(color_index, border_padding)
             self.color_index_island_list.extend(this_color_index_island_list)
         
         return self.color_index_island_list

@@ -34,7 +34,7 @@ def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0))
         )
 
 
-def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0]):
+def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0], padding=2):
     """Create a new image with the islands numbered.
     
     Args:
@@ -45,7 +45,9 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0]):
         np.array: A new image with the islands numbered.
     """
     # Create an all white image
-    numbered_islands = np.ones(image_shape, dtype=np.uint8) * 255
+    width, height, channels = image_shape
+    numbered_islands = np.ones((width + padding*2, height + padding*2, channels), 
+                               dtype=np.uint8) * 255
 
     for color_id, island_coordinates in islands:
         numbered_islands[island_coordinates] = border_color
