@@ -3,6 +3,8 @@ import numpy as np
 
 def _get_centroid(coordinates):
     rows, cols = coordinates
+    if len(rows) == 0 or len(cols) == 0:
+        return np.array([np.nan, np.nan])
     return (int(np.mean(rows)), int(np.mean(cols)))
 
 
@@ -52,15 +54,16 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0],
 
     for color_id, island_coordinates in islands:
         numbered_islands[island_coordinates] = border_color
-        centroid = _get_centroid(island_coordinates)
         
         # Add the number to the centroid of the island
         if show_numbers:
-            numbered_islands = _add_text_to_image(
-                numbered_islands, 
-                str(color_id), 
-                centroid
-            )
+            centroid = _get_centroid(island_coordinates)
+            if not np.isnan(centroid).any():
+                numbered_islands = _add_text_to_image(
+                    numbered_islands, 
+                    str(color_id), 
+                    centroid
+                )
     if binary:
         # Convert numbered_islands to binary using openCV
         numbered_islands = cv2.cvtColor(numbered_islands, cv2.COLOR_BGR2GRAY)
