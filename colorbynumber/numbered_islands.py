@@ -1,9 +1,36 @@
 import cv2
 import numpy as np
+from polylabel import polylabel
 
 def _get_centroid(coordinates):
     rows, cols = coordinates
     return (int(np.mean(rows)), int(np.mean(cols)))
+
+def _get_approx_contours(island_coords, width, height):
+    island_image = np.ones((width, height), dtype = np.uint8)
+    island_image[island_coords] = 0
+
+    contours, hierarchy = cv2.findContours(
+        island_image, 
+        mode = cv2.RETR_TREE,
+        method = cv2.CHAIN_APPROX_NONE
+    )
+
+    approx_contours = []
+    # Iterate over the odd-numbered contours and get the approximated contours.
+    # Consider only the odd-numbered contours because the even-numbered contours are the inner region of the lines.
+    for i in range(1, len(contours), 2):
+        epsilon = 0.01*cv2.arcLength(contours[i],True)
+        approx_contour = cv2.approxPolyDP(contours[i],epsilon,True)
+        approx_contours.append(approx_contour.squeeze())
+    
+    approx_contours = np.concatenate(approx_contours)
+    return approx_contours
+
+def _get_polylabel(coordinates, width, height):
+    approx_contours = _get_approx_contours(coordinates, width, height)
+    position_of_inaccessibility =  polylabel([approx_contours])
+    return (int(position_of_inaccessibility[0]), int(position_of_inaccessibility[1]))
 
 
 def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0)):
@@ -52,10 +79,15 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0],
 
     for color_id, island_coordinates in islands:
         numbered_islands[island_coordinates] = border_color
-        centroid = _get_centroid(island_coordinates)
         
         # Add the number to the centroid of the island
         if show_numbers:
+            centroid = _get_polylabel(
+                island_coordinates,
+                numbered_islands.shape[0],
+                numbered_islands.shape[1],
+                )
+            print(centroid)
             numbered_islands = _add_text_to_image(
                 numbered_islands, 
                 str(color_id), 
