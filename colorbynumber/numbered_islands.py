@@ -8,7 +8,7 @@ def _get_centroid(coordinates):
     return (int(np.mean(rows)), int(np.mean(cols)))
 
 
-def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0)):
+def _add_text_to_image(image, text, position, font_size=0.5, font_color=(0, 0, 0)):
     """Add text to an image.
     
     Args:
@@ -22,8 +22,7 @@ def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0))
     """
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = font_size
-    font_thickness = 4
-    position = (position[1], position[0])
+    font_thickness = 2
     return cv2.putText(
         image, 
         text, 
@@ -36,7 +35,9 @@ def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0))
         )
 
 
-def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0], 
+def create_numbered_islands(islands, image_shape, 
+                            centroid_coords_list = None,
+                            border_color=[0, 0, 0], 
                             padding=2, show_numbers=True, binary = False):
     """Create a new image with the islands numbered.
     
@@ -52,12 +53,15 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0],
     numbered_islands = np.ones((width + padding*2, height + padding*2, channels), 
                                dtype=np.uint8) * 255
 
-    for color_id, island_coordinates in islands:
+    for idx, (color_id, island_coordinates) in enumerate(islands):
         numbered_islands[island_coordinates] = border_color
         
         # Add the number to the centroid of the island
         if show_numbers:
-            centroid = _get_centroid(island_coordinates)
+            if centroid_coords_list:
+                centroid = centroid_coords_list[idx]
+            else:
+                centroid = _get_centroid(island_coordinates)
             if not np.isnan(centroid).any():
                 numbered_islands = _add_text_to_image(
                     numbered_islands, 

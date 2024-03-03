@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from polylabel import polylabel
 
 class GenerateIslands:
     def __init__(self, indices_color_choices,):
@@ -14,6 +15,12 @@ class GenerateIslands:
         self.island_fills = {}
         for color_index in np.unique(indices_color_choices):
             self.island_fills[color_index] = []
+        
+        # Coordinate of centroids of islands
+        self.island_centroids = {}
+        for color_index in np.unique(indices_color_choices):
+            self.island_centroids[color_index] = []
+
     
     def _is_valid_shape(self, contours, hierarchy, total_area, area_perc_threshold,
                         arc_length_area_ratio_threshold):
@@ -64,14 +71,44 @@ class GenerateIslands:
             area_perc_threshold = area_perc_threshold, 
             arc_length_area_ratio_threshold = arc_length_area_ratio_threshold
         )
+        
+        contours_selected = []
+        hierarchy_selected = []
+
         if is_valid_shape:
             for cntr_id, contour in enumerate(contours): 
                 area_fraction_perc = (cv.contourArea(contour) / total_area) * 100
                 if area_fraction_perc >= area_perc_threshold:
                     cv.drawContours(contours_image, contours, cntr_id, (0,255,0), 1)
+                    contours_selected.append(contour)
+                    hierarchy_selected.append(hierarchy[0][cntr_id])
         
         # If the shape is not valid, return a blank image
-        return contours_image
+        return contours_image, \
+            contours_selected, \
+            np.array(hierarchy_selected)
+
+
+    def _get_centroid_for_island(self, contours, hierarchy):
+        if len(contours) == 0:
+            return np.array([np.nan, np.nan])
+
+        coordinates_for_polylabel = []
+
+        external_contours_ids = np.where(hierarchy[:,-1] == -1)[0]
+        for external_contour_id in external_contours_ids:
+            epsilon = 0.01 * cv.arcLength(contours[external_contour_id],True)
+            approx_contour = cv.approxPolyDP(contours[external_contour_id], epsilon, True)
+            coordinates_for_polylabel.append(approx_contour.squeeze())
+
+        holes_contours_ids = np.where(hierarchy[:,-1] != -1)[0]
+        for hole_contour_id in holes_contours_ids:
+            epsilon = 0.01 * cv.arcLength(contours[hole_contour_id],True)
+            approx_contour = cv.approxPolyDP(contours[hole_contour_id], epsilon, True)
+            coordinates_for_polylabel.append(approx_contour.squeeze())
+        
+        centroid_coords =  polylabel(coordinates_for_polylabel)
+        return [int(centroid_coords[0]), int(centroid_coords[1])]
 
 
     def _get_islands_for_one_color(self, color_index, border_padding, area_perc_threshold, 
@@ -90,11 +127,18 @@ class GenerateIslands:
             
 
             # Get cleaned up contours
-            cleaned_up_contours = self._get_cleaned_up_contours(
+            cleaned_up_contours, contours_selected, hierarchies_selected = self._get_cleaned_up_contours(
                 island_fill = this_component, 
                 area_perc_threshold = area_perc_threshold, 
                 arc_length_area_ratio_threshold = arc_length_area_ratio_threshold
             )
+
+            # Get the centroid of the island
+            centroid_coords = self._get_centroid_for_island(
+                contours_selected,
+                hierarchies_selected
+            )
+            self.island_centroids[color_index].append(centroid_coords)
 
             contour_border_coords = np.where(cleaned_up_contours == 0)
             self.island_borders[color_index].append((color_index, contour_border_coords))
@@ -112,8 +156,11 @@ class GenerateIslands:
         
         # Flatten the list of borders
         island_borders_list = []
+        centroid_coords_list = []
         for color_id in self.island_borders:
-            island_borders_list += [border_coords for border_coords in self.island_borders[color_id] 
-                                    if len(border_coords[1][0]) > 0]
+            for idx, border_coords in enumerate(self.island_borders[color_id]):
+                if len(border_coords[1][0]) > 0:
+                    island_borders_list.append(self.island_borders[color_id][idx])
+                    centroid_coords_list.append(self.island_centroids[color_id][idx])
         
-        return island_borders_list
+        return island_borders_list, centroid_coords_list
