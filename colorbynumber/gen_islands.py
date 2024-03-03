@@ -8,9 +8,37 @@ class GenerateIslands:
         ):
         self.indices_color_choices = indices_color_choices
         self.gradient_kernel = np.ones((gradient_kernel_size, gradient_kernel_size), np.uint8)
-        self.color_index_island_list = []
+        
+        # List of coordinates for each islands border
+        self.island_borders = {}
+        for color_index in np.unique(indices_color_choices):
+            self.island_borders[color_index] = []
+        
+        # Images of the islands
+        self.island_fills = {}
+        for color_index in np.unique(indices_color_choices):
+            self.island_fills[color_index] = []
     
-    def _get_islands_for_one_color(self, color_index, border_padding):
+    def _get_cleaned_up_contours(self, island_fill, area_threshold_perc):
+        contours_image = np.ones_like(island_fill)
+
+        total_area = self.indices_color_choices.shape[0] * self.indices_color_choices.shape[1]
+
+        contours, hierarchy = cv.findContours(
+            island_fill, 
+            mode = cv.RETR_TREE,
+            method = cv.CHAIN_APPROX_NONE
+        )
+
+        for cntr_id, contour in enumerate(contours): 
+            area_fraction_perc = (cv.contourArea(contour) / total_area) * 100
+            if area_fraction_perc >= area_threshold_perc:
+                cv.drawContours(contours_image, contours, cntr_id, (0,255,0), 4)
+
+        return contours_image
+
+
+    def _get_islands_for_one_color(self, color_index, border_padding, area_threshold_perc):
         # Get a binary image with just the selected color
         this_color = (self.indices_color_choices == color_index).astype(np.uint8)
         # Pad the image to enable border detection on image boundaries
@@ -19,21 +47,25 @@ class GenerateIslands:
         # Find connected components
         num_labels, labels_im = cv.connectedComponents(this_color)
 
-        this_color_index_island_list = []
-
         for component_id in range(1, num_labels):
             this_component = (labels_im == component_id).astype(np.uint8)
+            self.island_fills[color_index].append(this_component)
             
-            # Border detection
-            gradient = cv.morphologyEx(this_component, cv.MORPH_GRADIENT, self.gradient_kernel)
+            # Get cleaned up contours
+            cleaned_up_contours = self._get_cleaned_up_contours(this_component, area_threshold_perc)
 
-            this_color_index_island_list.append((color_index, np.where(gradient == 1)))
-        
-        return this_color_index_island_list
+            contour_border_coords = np.where(cleaned_up_contours == 0)
+            if len(contour_border_coords[0]) > 0:
+                self.island_borders[color_index].append((color_index, contour_border_coords))
+
     
-    def get_islands(self, border_padding=2):
+    def get_islands(self, border_padding=2, area_threshold_perc=0.05):
         for color_index in np.unique(self.indices_color_choices):
-            this_color_index_island_list = self._get_islands_for_one_color(color_index, border_padding)
-            self.color_index_island_list.extend(this_color_index_island_list)
+            self._get_islands_for_one_color(color_index, border_padding, area_threshold_perc)
         
-        return self.color_index_island_list
+        # Flatten the list of borders
+        island_borders_list = []
+        for color_id in self.island_borders:
+            island_borders_list += self.island_borders[color_id]
+        
+        return island_borders_list
