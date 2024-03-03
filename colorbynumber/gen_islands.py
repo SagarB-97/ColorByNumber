@@ -55,8 +55,7 @@ class GenerateIslands:
             cleaned_up_contours = self._get_cleaned_up_contours(this_component, area_threshold_perc)
 
             contour_border_coords = np.where(cleaned_up_contours == 0)
-            if len(contour_border_coords[0]) > 0:
-                self.island_borders[color_index].append((color_index, contour_border_coords))
+            self.island_borders[color_index].append((color_index, contour_border_coords))
 
     
     def get_islands(self, border_padding=2, area_threshold_perc=0.05):
@@ -66,6 +65,7 @@ class GenerateIslands:
         # Flatten the list of borders
         island_borders_list = []
         for color_id in self.island_borders:
-            island_borders_list += self.island_borders[color_id]
+            if len(self.island_borders[color_id][1]) > 0:
+                island_borders_list += self.island_borders[color_id]
         
         return island_borders_list
