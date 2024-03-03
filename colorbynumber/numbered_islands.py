@@ -34,7 +34,8 @@ def _add_text_to_image(image, text, position, font_size=1, font_color=(0, 0, 0))
         )
 
 
-def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0], padding=2):
+def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0], 
+                            padding=2, show_numbers=True, binary = False):
     """Create a new image with the islands numbered.
     
     Args:
@@ -54,12 +55,18 @@ def create_numbered_islands(islands, image_shape, border_color=[0, 0, 0], paddin
         centroid = _get_centroid(island_coordinates)
         
         # Add the number to the centroid of the island
-        numbered_islands = _add_text_to_image(
-            numbered_islands, 
-            str(color_id), 
-            centroid
-        )
-    
+        if show_numbers:
+            numbered_islands = _add_text_to_image(
+                numbered_islands, 
+                str(color_id), 
+                centroid
+            )
+    if binary:
+        # Convert numbered_islands to binary using openCV
+        numbered_islands = cv2.cvtColor(numbered_islands, cv2.COLOR_BGR2GRAY)
+        _, numbered_islands = cv2.threshold(numbered_islands, 127, 255, cv2.THRESH_BINARY)
+        return numbered_islands
+
     return numbered_islands
 
 def _test_create_numbered_islands():
