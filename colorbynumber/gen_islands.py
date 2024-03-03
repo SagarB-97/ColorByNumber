@@ -2,12 +2,8 @@ import cv2 as cv
 import numpy as np
 
 class GenerateIslands:
-    def __init__(self, 
-        indices_color_choices,
-        gradient_kernel_size = 4,
-        ):
+    def __init__(self, indices_color_choices,):
         self.indices_color_choices = indices_color_choices
-        self.gradient_kernel = np.ones((gradient_kernel_size, gradient_kernel_size), np.uint8)
         
         # List of coordinates for each islands border
         self.island_borders = {}
@@ -72,7 +68,7 @@ class GenerateIslands:
             for cntr_id, contour in enumerate(contours): 
                 area_fraction_perc = (cv.contourArea(contour) / total_area) * 100
                 if area_fraction_perc >= area_perc_threshold:
-                    cv.drawContours(contours_image, contours, cntr_id, (0,255,0), 4)
+                    cv.drawContours(contours_image, contours, cntr_id, (0,255,0), 1)
         
         # If the shape is not valid, return a blank image
         return contours_image
@@ -107,7 +103,6 @@ class GenerateIslands:
     def get_islands(self, border_padding=2, area_perc_threshold=0.05, 
                     arc_length_area_ratio_threshold=0.1):
         for color_index in np.unique(self.indices_color_choices):
-            print(color_index)
             self._get_islands_for_one_color(
                 color_index = color_index, 
                 border_padding = border_padding, 
@@ -118,7 +113,7 @@ class GenerateIslands:
         # Flatten the list of borders
         island_borders_list = []
         for color_id in self.island_borders:
-            if len(self.island_borders[color_id][1]) > 0:
-                island_borders_list += self.island_borders[color_id]
+            island_borders_list += [border_coords for border_coords in self.island_borders[color_id] 
+                                    if len(border_coords[1][0]) > 0]
         
         return island_borders_list
