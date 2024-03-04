@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 
+from .config import default_config
 
 def _choose_closest_colors(image, color_list):
     """
@@ -40,8 +41,7 @@ def _denoise_image(image, h):
 
 def simplify_image(image, 
                    color_list, 
-                   denoise = True,
-                   denoise_h = 100
+                   config = default_config,
                    ):
     """
     Converts all colors in an image to the closest color in the color list.
@@ -54,6 +54,8 @@ def simplify_image(image,
     Returns:
       A copy of the image with all colors replaced with the closest color in the list.
     """
+    denoise = config["denoise"]
+    denoise_h = config["denoise_h"]
     
     simplified_image, indices_color_choices = _choose_closest_colors(image, color_list)
     if denoise:

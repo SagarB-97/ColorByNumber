@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from .config import default_config
+
 def _get_centroid(coordinates):
     rows, cols = coordinates
     if len(rows) == 0 or len(cols) == 0:
@@ -8,7 +10,7 @@ def _get_centroid(coordinates):
     return (int(np.mean(rows)), int(np.mean(cols)))
 
 
-def _add_text_to_image(image, text, position, font_size=0.5, font_color=(0, 0, 0)):
+def _add_text_to_image(image, text, position, font_size, font_color, font_thickness):
     """Add text to an image.
     
     Args:
@@ -21,14 +23,12 @@ def _add_text_to_image(image, text, position, font_size=0.5, font_color=(0, 0, 0
         np.array: A new image with the text added.
     """
     font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = font_size
-    font_thickness = 2
     return cv2.putText(
         image, 
         text, 
         position, 
         font, 
-        font_scale, 
+        font_size, 
         font_color, 
         font_thickness, 
         cv2.LINE_AA
@@ -37,8 +37,8 @@ def _add_text_to_image(image, text, position, font_size=0.5, font_color=(0, 0, 0
 
 def create_numbered_islands(islands, image_shape, 
                             centroid_coords_list = None,
-                            border_color=[0, 0, 0], 
-                            padding=2, show_numbers=True, binary = False):
+                            config = default_config, 
+                            show_numbers=True, binary = False):
     """Create a new image with the islands numbered.
     
     Args:
@@ -48,6 +48,13 @@ def create_numbered_islands(islands, image_shape,
     Returns:
         np.array: A new image with the islands numbered.
     """
+
+    padding = config["border_padding"]
+    border_color = config["border_color"]
+    font_size = config["font_size"]
+    font_color = config["font_color"]
+    font_thickness = config["font_thickness"]
+
     # Create an all white image
     width, height, channels = image_shape
     numbered_islands = np.ones((width + padding*2, height + padding*2, channels), 
@@ -64,9 +71,12 @@ def create_numbered_islands(islands, image_shape,
                 centroid = _get_centroid(island_coordinates)
             if not np.isnan(centroid).any():
                 numbered_islands = _add_text_to_image(
-                    numbered_islands, 
-                    str(color_id), 
-                    centroid
+                    image=numbered_islands, 
+                    text=str(color_id), 
+                    position=centroid,
+                    font_size=font_size,
+                    font_color=font_color,
+                    font_thickness=font_thickness
                 )
     if binary:
         # Convert numbered_islands to binary using openCV

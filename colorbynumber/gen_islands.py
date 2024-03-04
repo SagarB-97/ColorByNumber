@@ -2,6 +2,9 @@ import cv2 as cv
 import numpy as np
 from polylabel import polylabel
 
+from .config import default_config
+
+
 class GenerateIslands:
     def __init__(self, indices_color_choices,):
         self.indices_color_choices = indices_color_choices
@@ -144,8 +147,11 @@ class GenerateIslands:
             self.island_borders[color_index].append((color_index, contour_border_coords))
 
     
-    def get_islands(self, border_padding=2, area_perc_threshold=0.05, 
-                    arc_length_area_ratio_threshold=0.1):
+    def get_islands(self, config = default_config):
+        border_padding = config["border_padding"]
+        area_perc_threshold = config["area_perc_threshold"]
+        arc_length_area_ratio_threshold = config["arc_length_area_ratio_threshold"]
+
         for color_index in np.unique(self.indices_color_choices):
             self._get_islands_for_one_color(
                 color_index = color_index, 

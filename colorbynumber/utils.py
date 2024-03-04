@@ -20,3 +20,5 @@ def draw_contours(contour, image_width, image_height):
         cv.drawContours(contours_image, [contour], 0, (0,255,0), 4)
     show_image(contours_image, cmap = 'gray')
 
+def save_image(image, filename):
+    cv.imwrite(filename, image)
