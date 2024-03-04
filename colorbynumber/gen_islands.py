@@ -56,7 +56,7 @@ class GenerateIslands:
 
 
     def _get_cleaned_up_contours(self, island_fill, area_perc_threshold, 
-                                 arc_length_area_ratio_threshold):
+                                 arc_length_area_ratio_threshold, check_shape_validity):
         contours_image = np.ones_like(island_fill)
 
         total_area = self.indices_color_choices.shape[0] * self.indices_color_choices.shape[1]
@@ -67,13 +67,16 @@ class GenerateIslands:
             method = cv.CHAIN_APPROX_NONE
         )
 
-        is_valid_shape = self._is_valid_shape(
-            contours = contours, 
-            hierarchy = hierarchy,
-            total_area = total_area,
-            area_perc_threshold = area_perc_threshold, 
-            arc_length_area_ratio_threshold = arc_length_area_ratio_threshold
-        )
+        if check_shape_validity:
+            is_valid_shape = self._is_valid_shape(
+                contours = contours, 
+                hierarchy = hierarchy,
+                total_area = total_area,
+                area_perc_threshold = area_perc_threshold, 
+                arc_length_area_ratio_threshold = arc_length_area_ratio_threshold
+            )
+        else:
+            is_valid_shape = True
         
         contours_selected = []
         hierarchy_selected = []
@@ -115,7 +118,7 @@ class GenerateIslands:
 
 
     def _get_islands_for_one_color(self, color_index, border_padding, area_perc_threshold, 
-                                   arc_length_area_ratio_threshold):
+                                   arc_length_area_ratio_threshold, check_shape_validity):
         # Get a binary image with just the selected color
         this_color = (self.indices_color_choices == color_index).astype(np.uint8)
         # Pad the image to enable border detection on image boundaries
@@ -133,7 +136,8 @@ class GenerateIslands:
             cleaned_up_contours, contours_selected, hierarchies_selected = self._get_cleaned_up_contours(
                 island_fill = this_component, 
                 area_perc_threshold = area_perc_threshold, 
-                arc_length_area_ratio_threshold = arc_length_area_ratio_threshold
+                arc_length_area_ratio_threshold = arc_length_area_ratio_threshold,
+                check_shape_validity = check_shape_validity
             )
 
             # Get the centroid of the island
@@ -151,6 +155,7 @@ class GenerateIslands:
         border_padding = config["border_padding"]
         area_perc_threshold = config["area_perc_threshold"]
         arc_length_area_ratio_threshold = config["arc_length_area_ratio_threshold"]
+        check_shape_validity = config["check_shape_validity"]
 
         for color_index in np.unique(self.indices_color_choices):
             self._get_islands_for_one_color(
@@ -158,6 +163,7 @@ class GenerateIslands:
                 border_padding = border_padding, 
                 area_perc_threshold = area_perc_threshold,
                 arc_length_area_ratio_threshold = arc_length_area_ratio_threshold,
+                check_shape_validity = check_shape_validity
             )
         
         # Flatten the list of borders
