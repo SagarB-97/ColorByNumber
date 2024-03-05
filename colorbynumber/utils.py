@@ -1,3 +1,5 @@
+import os
+
 import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
@@ -23,4 +25,8 @@ def draw_contours(contour, image_width, image_height):
 def save_image(image, filename, convert_to_bgr = True):
     if convert_to_bgr:
         image = cv.cvtColor(image.astype(np.uint8), cv.COLOR_RGB2BGR)
+    
+    directory = os.path.dirname(filename)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     cv.imwrite(filename, image)
