@@ -5,7 +5,6 @@ channels:
   - menpo
 dependencies:
   - python=3.9
-  - numpy
   - opencv
   - jupyterlab
   - matplotlib
