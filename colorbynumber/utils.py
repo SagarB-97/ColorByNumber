@@ -20,5 +20,7 @@ def draw_contours(contour, image_width, image_height):
         cv.drawContours(contours_image, [contour], 0, (0,255,0), 4)
     show_image(contours_image, cmap = 'gray')
 
-def save_image(image, filename):
+def save_image(image, filename, convert_to_bgr = True):
+    if convert_to_bgr:
+        image = cv.cvtColor(image.astype(np.uint8), cv.COLOR_RGB2BGR)
     cv.imwrite(filename, image)
