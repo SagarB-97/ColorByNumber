@@ -8,6 +8,12 @@ from .numbered_islands import create_numbered_islands
 
 class ColorByNumber:
     def __init__(self, image_path, color_list, config = default_config):
+        """
+        Args:
+            image_path: Path to the image file.
+            color_list: List of colors in (R, G, B) format.
+            config: Dictionary of configuration parameters (optional).
+        """
         self.image_path = image_path
         self.color_list = color_list
         self.config = config
@@ -53,12 +59,15 @@ class ColorByNumber:
         Generates a grid of colored squares with labels below them.
 
         Args:
-            colors: List of colors in (R, G, B) format.
-            rows: Number of rows in the grid (optional).
-            cols: Number of columns in the grid (optional).
-
-        Returns:
-            A NumPy array representing the color grid image.
+            cols: Number of columns in the grid.
+            rows: Number of rows in the grid.
+            square_size: Size of each square in the grid.
+            margin: Margin around the grid.
+            gap_horizontal: Horizontal gap between squares.
+            gap_vertical: Vertical gap between squares.
+            font: Font for the labels.
+            font_size: Font size for the labels.
+            border_color: Color of the border around each square.
         """
 
         # Calculate grid dimensions if not provided

@@ -6,7 +6,12 @@ from .config import default_config
 
 
 class GenerateIslands:
-    def __init__(self, indices_color_choices,):
+    def __init__(self, indices_color_choices):
+        """
+        Args:
+            indices_color_choices: 2D numpy array with the same shape as the image.
+                Shows the color index chosen for each pixel in the image.
+        """
         self.indices_color_choices = indices_color_choices
         
         # List of coordinates for each islands border
