@@ -23,6 +23,8 @@ def _add_text_to_image(image, text, position, font_size, font_color, font_thickn
         np.array: A new image with the text added.
     """
     font = cv2.FONT_HERSHEY_SIMPLEX
+    text_size, _ = cv2.getTextSize(text, font, font_size, 1)
+    position = (position[0] - text_size[0]//2, position[1] + text_size[1]//2)
     return cv2.putText(
         image, 
         text, 

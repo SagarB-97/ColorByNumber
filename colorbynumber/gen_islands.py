@@ -85,7 +85,12 @@ class GenerateIslands:
             for cntr_id, contour in enumerate(contours): 
                 area_fraction_perc = (cv.contourArea(contour) / total_area) * 100
                 if area_fraction_perc >= area_perc_threshold:
-                    cv.drawContours(contours_image, contours, cntr_id, (0,255,0), 1)
+                    cv.drawContours(
+                        image = contours_image, 
+                        contours = [contour], 
+                        contourIdx = 0, 
+                        color = (0,255,0), 
+                        thickness = 1)
                     contours_selected.append(contour)
                     hierarchy_selected.append(hierarchy[0][cntr_id])
         
