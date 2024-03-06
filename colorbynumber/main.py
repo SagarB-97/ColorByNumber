@@ -107,9 +107,10 @@ class ColorByNumber:
             image[start_row:end_row, end_col] = border_color # Right Border
 
             # Draw text label below the square
-            text_size, _ = cv.getTextSize(str(i), font, font_size, 1)
+            text = str(i + 1)
+            text_size, _ = cv.getTextSize(text, font, font_size, 1)
             text_row = (end_row + text_size[1]) + 5
             text_col = start_col + (square_size // 2) - (text_size[0] // 2)
-            cv.putText(image, str(i), (text_col, text_row), font, font_size, (0, 0, 0), 1)
+            cv.putText(image, text, (text_col, text_row), font, font_size, (0, 0, 0), 1)
 
         return image

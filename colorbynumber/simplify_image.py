@@ -26,6 +26,9 @@ def _choose_closest_colors(image, color_list):
     indices_color_choices = norm_diff.argmin(axis = -1)
     simplified_image = color_list[indices_color_choices.flatten(), :].reshape(image.shape)
 
+    # Adding 1 to indices_color_choices as so the first color is labeled as 1 and not 0.
+    indices_color_choices = indices_color_choices + 1
+
     return simplified_image, indices_color_choices
 
 def _denoise_image(image, h):
