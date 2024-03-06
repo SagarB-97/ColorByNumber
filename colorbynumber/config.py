@@ -3,7 +3,7 @@ default_config = {
     "denoise": True,
 
     # Higher values will result in more aggressive denoising.
-    "denoise_h": 100,
+    "denoise_h": 200,
 
     # Padding around the borders of the image.
     "border_padding": 2,
@@ -15,7 +15,7 @@ default_config = {
 
     # Color islands with area less than this threshold will be ignored.
     # The value is a percentage of the total area of the image.
-    "area_perc_threshold": 0.05,
+    "area_perc_threshold": 0.02,
 
     # If True, all shapes with perimeter to area ratio of less than
     # arc_length_area_ratio_threshold will be ignored.
@@ -23,10 +23,10 @@ default_config = {
     "arc_length_area_ratio_threshold": 1,
 
     # Color of the border around around color islands.
-    "border_color": (0, 0, 0),
+    "border_color": (181, 181, 181),
 
     # Font for the numbers shown in color islands.
-    "font_size": 0.5,
-    "font_color": (0, 0, 0),
-    "font_thickness": 2,
+    "font_size": 0.3,
+    "font_color": (140, 140, 140),
+    "font_thickness": 1,
 }
