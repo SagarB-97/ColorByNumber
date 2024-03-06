@@ -128,11 +128,16 @@ class GenerateIslands:
 
 
     def _get_islands_for_one_color(self, color_index, border_padding, area_perc_threshold, 
-                                   arc_length_area_ratio_threshold, check_shape_validity):
+                                   arc_length_area_ratio_threshold, check_shape_validity,
+                                   open_kernel_size):
         # Get a binary image with just the selected color
         this_color = (self.indices_color_choices == color_index).astype(np.uint8)
         # Pad the image to enable border detection on image boundaries
         this_color = np.pad(this_color, border_padding, mode='constant', constant_values=0)
+
+        # Run the open morphological operation to remove small islands and isthmuses
+        kernel = np.ones((open_kernel_size, open_kernel_size),np.uint8)
+        this_color = cv.morphologyEx(this_color, cv.MORPH_OPEN, kernel)
 
         # Find connected components
         num_labels, labels_im = cv.connectedComponents(this_color)
@@ -166,6 +171,7 @@ class GenerateIslands:
         area_perc_threshold = config["area_perc_threshold"]
         arc_length_area_ratio_threshold = config["arc_length_area_ratio_threshold"]
         check_shape_validity = config["check_shape_validity"]
+        open_kernel_size = config["open_kernel_size"]
 
         for color_index in np.unique(self.indices_color_choices):
             self._get_islands_for_one_color(
@@ -173,7 +179,8 @@ class GenerateIslands:
                 border_padding = border_padding, 
                 area_perc_threshold = area_perc_threshold,
                 arc_length_area_ratio_threshold = arc_length_area_ratio_threshold,
-                check_shape_validity = check_shape_validity
+                check_shape_validity = check_shape_validity,
+                open_kernel_size = open_kernel_size,
             )
         
         # Flatten the list of borders

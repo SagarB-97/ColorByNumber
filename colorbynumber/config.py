@@ -8,6 +8,11 @@ default_config = {
     # Padding around the borders of the image.
     "border_padding": 2,
 
+    # Determines the size of the kernel used for open morphological operation.
+    # This removes small islands and isthmuses.
+    "open_kernel_size": 3,
+
+
     # Color islands with area less than this threshold will be ignored.
     # The value is a percentage of the total area of the image.
     "area_perc_threshold": 0.05,
