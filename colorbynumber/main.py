@@ -34,11 +34,12 @@ class ColorByNumber:
         island_borders_list, centroid_coords_list = generate_islands_obj.get_islands(config=self.config)
         self.generate_islands_obj = generate_islands_obj
         self.island_borders_list = island_borders_list
+        self.centroid_coords_list = centroid_coords_list
 
         numbered_islands = create_numbered_islands(
             islands = self.island_borders_list, 
             image_shape = self.image.shape,
-            centroid_coords_list = centroid_coords_list,
+            centroid_coords_list = self.centroid_coords_list,
             config = self.config
             )
         self.numbered_islands = numbered_islands
