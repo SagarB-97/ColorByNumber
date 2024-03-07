@@ -1,8 +1,17 @@
 default_config = {
     # If True, the image will be denoised after simplification.
     "denoise": True,
+    
+    # Determines the order of denoising.
+    # Options: "before_simplify", "after_simplify"
+    "denoise_order": "before_simplify",
 
-    # Higher values will result in more aggressive denoising.
+    # Type of denoising to be used.
+    # Options: "fastNlMeansDenoisingColored", "gaussianBlur", "blur"
+    "denoise_type": "gaussianBlur",
+    # Size of the kernel used for gaussian blur.
+    "blur_size": 51,
+    # h parameter for fastNlMeansDenoisingColored.
     "denoise_h": 200,
 
     # Padding around the borders of the image.
@@ -26,7 +35,7 @@ default_config = {
     "border_color": (181, 181, 181),
 
     # Font for the numbers shown in color islands.
-    "font_size": 0.3,
+    "font_size": 1,
     "font_color": (140, 140, 140),
-    "font_thickness": 1,
+    "font_thickness": 2,
 }
