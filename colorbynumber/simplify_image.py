@@ -1,7 +1,9 @@
 import cv2 as cv
 import numpy as np
 
+from .assign_colors import assign_colors
 from .config import default_config
+from .utils import show_image, generate_color_legend
 
 def _choose_closest_colors(image, color_list):
     """
@@ -96,6 +98,10 @@ def simplify_image(image,
             denoise_type = config["denoise_type"], 
             blur_size = config["blur_size"],
             )
+        if config["debug"]:
+            print("Denoised Image before simplifying:")
+            show_image(image)
+
 
     if color_list is None:
         # Use kmeans to simplify the image to the specified number of colors.
@@ -104,7 +110,38 @@ def simplify_image(image,
     else:
         if config["apply_kmeans"]:
             image, indices_color_choices, color_list_kmeans = _kmeans_simplify_image(image, len(color_list))
-        simplified_image, indices_color_choices = _choose_closest_colors(image, color_list)
+            if config["debug"]:
+                print("Kmeans colors:")
+                show_image(image)
+
+            # Assigning colors to the kmeans colors.
+            color_areas = []
+            for color in color_list_kmeans:
+                color_areas.append(np.sum(image == color))
+            import random
+            color_list_shuffled = color_list_kmeans.copy()
+            random.shuffle(color_list_shuffled)
+            color_mapping = assign_colors(color_list_kmeans, color_list_shuffled, color_areas)
+            color_list = np.array([
+                color_mapping[tuple(color)] for color in color_list_kmeans
+                ])
+            if config["debug"]:
+                print("Color mapping:")
+                print("Kmeans colors:")
+                show_image(generate_color_legend(color_list_kmeans))
+                print("User colors:")
+                show_image(generate_color_legend(color_list))
+
+            simplified_image = color_list[indices_color_choices.flatten() - 1].reshape(image.shape)
+            if config["debug"]:
+                print("Image with reassignment of kmeans colors:")
+                show_image(simplified_image)
+            
+        else:
+            simplified_image, indices_color_choices = _choose_closest_colors(
+                image, 
+                color_list
+                )
     
 
     if config["denoise"] and (config["denoise_order"] == "after_simplify"):

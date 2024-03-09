@@ -1,4 +1,7 @@
 default_config = {
+    # If True, the program will print debug information.
+    "debug": False,
+
     # If True, the image will be denoised after simplification.
     "denoise": True,
     

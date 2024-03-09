@@ -22,6 +22,6 @@ def assign_colors(palette_a, palette_b, weights):
     row_indices, col_indices = linear_sum_assignment(cost_matrix)
 
     # Create a dictionary mapping each color in B to a color in A.
-    color_mapping = {tuple(palette_b[j]): tuple(palette_a[i]) for i, j in zip(row_indices, col_indices)}
+    color_mapping = {tuple(palette_a[i]): tuple(palette_b[j]) for i, j in zip(row_indices, col_indices)}
 
     return color_mapping
