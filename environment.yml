@@ -8,5 +8,6 @@ dependencies:
   - opencv
   - jupyterlab
   - matplotlib
+  - scipy
   - pip:
     - python-polylabel
