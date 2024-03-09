@@ -6,6 +6,10 @@ default_config = {
     # Options: "before_simplify", "after_simplify"
     "denoise_order": "before_simplify",
 
+    # If True, the image will be simplified using kmeans clustering.
+    # And then the colors will be matched to closest color in the palette.
+    "apply_kmeans": True,
+
     # Type of denoising to be used.
     # Options: "fastNlMeansDenoisingColored", "gaussianBlur", "blur"
     "denoise_type": "gaussianBlur",

@@ -102,6 +102,8 @@ def simplify_image(image,
         simplified_image, indices_color_choices, color_list = _kmeans_simplify_image(image, num_colors)
 
     else:
+        if config["apply_kmeans"]:
+            image, indices_color_choices, color_list_kmeans = _kmeans_simplify_image(image, len(color_list))
         simplified_image, indices_color_choices = _choose_closest_colors(image, color_list)
     
 
