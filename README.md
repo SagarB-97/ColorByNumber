@@ -1,3 +1,11 @@
+---
+title: Color By Number
+sdk: gradio
+sdk_version: 4.25.0
+app_file: app.py
+license: mit
+---
+
 # Color by number
 
 "[Color by number](https://en.wikipedia.org/wiki/Paint_by_number)" is a coloring activity in which the canvas is delineated into sections labelled with numbers and the user fills in these sections with colors corresponding to their numbers, in a manner similar to a coloring book. This project helps you create your own Color By Number kit for an image of your choice.
