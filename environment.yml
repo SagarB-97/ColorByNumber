@@ -11,3 +11,4 @@ dependencies:
   - scipy
   - pip:
     - python-polylabel
+    - gradio
