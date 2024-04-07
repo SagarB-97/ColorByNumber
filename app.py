@@ -1,8 +1,8 @@
 import gradio as gr
 
 from colorbynumber.config import default_config
-from . import callbacks
-from . import doc
+from gradio_server import callbacks
+from gradio_server import doc
 
 MAX_NUM_COLORS = 50 # Mostly for UI purposes
 
