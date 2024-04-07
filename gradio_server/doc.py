@@ -6,6 +6,13 @@ def color_selection_block():
     or let the algorithm choose the best colors for you.
     """
 
+def edit_coloring_page_block_header():
+    return """
+    ---
+    ## Edit Coloring Page
+    Change the font size and thickness of the numbers on the coloring page.
+    """
+
 def parameters_block_header():
     return """
     ---

@@ -1,59 +1,15 @@
 import gradio as gr
 
-from colorbynumber.main import ColorByNumber
 from colorbynumber.config import default_config
+from . import callbacks
 from . import doc
 
 MAX_NUM_COLORS = 50 # Mostly for UI purposes
 
-def get_color_by_number(image_path, number_of_colors, 
-                        is_automatic_colors, num_colors,
-                        denoise_flag, denoise_order, denoise_type,
-                        blur_size, denoise_h,
-                        open_kernel_size, area_perc_threshold,
-                        check_shape_validity, arc_length_area_ratio_threshold,
-                        *color_list):
-    # Convert each color to r,g,b tuple
-    color_list = color_list[:num_colors]
-    def _hex_to_rgb(hex_color):
-        hex_color = hex_color.lstrip("#")
-        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-    color_list = [_hex_to_rgb(h) for h in color_list]
-
-    # Update config
-    config = default_config.copy()
-    config["denoise"] = denoise_flag
-    config["denoise_order"] = denoise_order
-    config["denoise_type"] = denoise_type
-    config["blur_size"] = blur_size
-    config["denoise_h"] = denoise_h
-    config["open_kernel_size"] = open_kernel_size
-    config["area_perc_threshold"] = area_perc_threshold
-    config["check_shape_validity"] = check_shape_validity
-    config["arc_length_area_ratio_threshold"] = arc_length_area_ratio_threshold
-
-    if is_automatic_colors:
-        colorbynumber_obj = ColorByNumber(
-            image_path = image_path,
-            num_colors = number_of_colors,
-            config = config,
-        )
-    else:
-        colorbynumber_obj = ColorByNumber(
-            image_path = image_path, 
-            color_list = color_list,
-            config = config,
-        )
-
-    numbered_islands = colorbynumber_obj.create_color_by_number()
-    return numbered_islands, \
-        colorbynumber_obj.generate_color_legend(), \
-        colorbynumber_obj.simplified_image
-
 with gr.Blocks(title = "Color by number") as demo:
     with gr.Row():
         # Inputs
-        with gr.Column():
+        with gr.Column(elem_id="inputColumn"):
             image_path = gr.Image(type="filepath")
             image_examples = gr.Examples(
                 examples=[
@@ -204,12 +160,35 @@ with gr.Blocks(title = "Color by number") as demo:
         # Outputs
         with gr.Column():
             color_by_number_image = gr.Image(label = "Color by number")
+
+            # Edit coloring page
+            with gr.Row():
+                font_size = gr.Slider(
+                    label = "Font size", 
+                    minimum = 0.1, 
+                    maximum = 10, 
+                    value = default_config["font_size"],
+                )
+                font_thickness = gr.Slider(
+                    label = "Font thickness", 
+                    minimum = 1, 
+                    maximum = 10,
+                    step=1, 
+                    value = default_config["font_thickness"],
+                )
+                font_color = gr.ColorPicker(
+                    label = "Font color", 
+                    value = "#8c8c8c",
+                    visible=False,
+                    )
             legend_image = gr.Image(label = "Legend")
             simplified_image = gr.Image(label = "Simplified image")
+            islands_image = gr.Image(label = "Islands (no numbers)", visible=False)
+            data = gr.State() # To store the data for font change
 
         # Submit button callback
         submit_button.click(
-            fn = get_color_by_number,
+            fn = callbacks.get_color_by_number,
             inputs = [
                 image_path, 
                 number_of_colors,
@@ -224,9 +203,26 @@ with gr.Blocks(title = "Color by number") as demo:
                 area_perc_threshold,
                 check_shape_validity,
                 arc_length_area_ratio_threshold,
+                font_size,
+                font_color,
+                font_thickness,
                 *color_pickers
                 ],
-            outputs = [color_by_number_image, legend_image, simplified_image]
+            outputs = [color_by_number_image, legend_image, simplified_image, islands_image, data]
         )
+
+        # Callback to change font on image
+        gr.on(
+                triggers=[font_size.change, font_thickness.change],
+                fn = callbacks.change_font_on_image,
+                inputs = [
+                    islands_image, 
+                    data, 
+                    font_size, 
+                    font_color, 
+                    font_thickness
+                    ],
+                outputs = color_by_number_image
+            )
 
 demo.launch()
