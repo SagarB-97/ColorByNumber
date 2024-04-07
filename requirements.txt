@@ -1,5 +1,5 @@
 # This is used by Hugging Spaces hosting to install the required packages
 
-opencv==4.6.0
-scipy==1.11.4
-python-polylabel==0.6
+opencv
+scipy
+python-polylabel
