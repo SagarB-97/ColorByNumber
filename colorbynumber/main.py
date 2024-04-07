@@ -4,7 +4,7 @@ import numpy as np
 from .config import default_config
 from .simplify_image import simplify_image
 from .gen_islands import GenerateIslands
-from .numbered_islands import create_numbered_islands
+from .numbered_islands import create_islands, add_numbers_to_image
 
 class ColorByNumber:
     def __init__(self, image_path, 
@@ -47,13 +47,23 @@ class ColorByNumber:
         self.island_borders_list = island_borders_list
         self.centroid_coords_list = centroid_coords_list
 
-        numbered_islands = create_numbered_islands(
+        # Create the islands image
+        self.islands_image = create_islands(
             islands = self.island_borders_list, 
-            image_shape = self.image.shape,
-            centroid_coords_list = self.centroid_coords_list,
-            config = self.config
+            image_shape = self.image.shape, 
+            padding = self.config["border_padding"], 
+            border_color = self.config["border_color"]
             )
-        self.numbered_islands = numbered_islands
+
+        # Add numbers to the islands image
+        self.numbered_islands = add_numbers_to_image(
+            image=self.islands_image,
+            centroid_coords_list=self.centroid_coords_list,
+            color_id_list=[color_id for color_id, _ in self.island_borders_list],
+            font_size=self.config["font_size"],
+            font_color=self.config["font_color"],
+            font_thickness=self.config["font_thickness"]
+            )
 
         return self.numbered_islands
     
