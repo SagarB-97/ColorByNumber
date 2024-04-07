@@ -1,5 +1,5 @@
 # This is used by Hugging Spaces hosting 
 
-opencv-python==4.6.0
+opencv-python==4.6.0.66
 scipy==1.11.4
 python-polylabel==0.6
