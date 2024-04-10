@@ -73,6 +73,22 @@ def _denoise_image(image, h, denoise_type, blur_size = None):
 
     return denoised_image
 
+def downsample_image(image):
+    """
+    Downsample the image so the max dimension is 1000 pixels.
+    """
+    max_dim = 1000
+    width, height = image.shape[:2]
+    if width > height:
+        new_width = max_dim
+        new_height = int(height * (new_width / width))
+    else:
+        new_height = max_dim
+        new_width = int(width * (new_height / height))
+    
+    image = cv.resize(image, (new_height, new_width), interpolation = cv.INTER_AREA)
+    return image
+
 def simplify_image(image, 
                    color_list = None,
                    num_colors = None, 

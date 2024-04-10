@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 from .config import default_config
-from .simplify_image import simplify_image
+from .simplify_image import simplify_image, downsample_image
 from .gen_islands import GenerateIslands
 from .numbered_islands import create_islands, add_numbers_to_image
 
@@ -26,6 +26,7 @@ class ColorByNumber:
 
         image = cv.imread(self.image_path)
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+        image = downsample_image(image)
         self.image = image
 
     def create_color_by_number(self):
